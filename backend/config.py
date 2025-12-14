@@ -24,3 +24,6 @@ OPENROUTER_API_URL = "https://openrouter.ai/api/v1/chat/completions"
 
 # Data directory for conversation storage
 DATA_DIR = "data/conversations"
+
+# SQLite database path (created automatically if missing)
+DB_PATH = os.getenv("DB_PATH", "data/conversations.db")

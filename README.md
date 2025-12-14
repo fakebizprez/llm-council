@@ -64,6 +64,13 @@ CHAIRMAN_MODEL = "google/gemini-3-pro-preview"
 ./start.sh
 ```
 
+**Option 1b: Run with Docker Compose**
+```bash
+docker compose up --build
+```
+
+Then open http://localhost:5173 in your browser. The backend is exposed at http://localhost:8001.
+
 **Option 2: Run manually**
 
 Terminal 1 (Backend):
@@ -83,5 +90,5 @@ Then open http://localhost:5173 in your browser.
 
 - **Backend:** FastAPI (Python 3.10+), async httpx, OpenRouter API
 - **Frontend:** React + Vite, react-markdown for rendering
-- **Storage:** JSON files in `data/conversations/`
+- **Storage:** SQLite database at `data/conversations.db` (override with `DB_PATH`)
 - **Package Management:** uv for Python, npm for JavaScript
