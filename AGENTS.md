@@ -1,36 +1,57 @@
 # Repository Guidelines
 
 ## Project Structure & Module Organization
-- `backend/`: FastAPI service, routing in `main.py`, council orchestration in `council.py`, OpenRouter client in `openrouter.py`, config in `config.py`.
-- `frontend/`: React + Vite app, entry in `src/main.jsx`, UI in `src/App.jsx` and `src/components/`, styles in `src/App.css` and `src/index.css`.
-- `data/`: Conversation JSON archives under `data/conversations/`; avoid committing sensitive runs.
-- Root helpers: `start.sh` launches both services; `pyproject.toml` defines Python deps; `frontend/package.json` defines web scripts.
+- `backend/`: FastAPI service.
+  - `main.py`: API routes (including streaming) and app entry point.
+  - `council.py`: Orchestration of the 3-stage LLM council process.
+  - `openrouter.py`: Client for OpenRouter API.
+  - `storage.py`: SQLite database operations (`data/conversations.db`).
+  - `config.py`: Configuration and model constants.
+- `frontend/`: React + Vite app.
+  - `src/main.jsx`: Entry point.
+  - `src/App.jsx`: Main application component.
+  - `src/api.js`: API client for backend communication.
+  - `src/components/`: UI components (ChatInterface, Stages, Sidebar).
+  - `src/App.css`, `src/index.css`: Styles.
+- `data/`: Created at runtime. Contains `conversations.db` (SQLite) for storing chat history.
+- Root helpers:
+  - `start.sh`: Launches both backend and frontend services.
+  - `pyproject.toml`: Python dependencies (managed by `uv`).
+  - `frontend/package.json`: Node dependencies and scripts.
 
 ## Build, Test, and Development Commands
-- Install backend deps: `uv sync`.
-- Install frontend deps: `cd frontend && npm install`.
-- Run full stack: `./start.sh` (backend on 8001, frontend on 5173).
-- Manual dev: `uv run python -m backend.main` (API) and `cd frontend && npm run dev` (Vite server).
-- Frontend checks: `cd frontend && npm run lint`. No formal backend lint script yet; keep code PEP 8-ish.
+- **Backend Setup**: `uv sync` to install dependencies.
+- **Frontend Setup**: `cd frontend && npm install`.
+- **Run Full Stack**: `./start.sh` (Backend: http://localhost:8001, Frontend: http://localhost:5173).
+- **Manual Development**:
+  - Backend: `uv run python -m backend.main`
+  - Frontend: `cd frontend && npm run dev`
+- **Linting**:
+  - Frontend: `cd frontend && npm run lint`
+  - Backend: Follow PEP 8.
 
 ## Coding Style & Naming Conventions
-- Python: 3.10+, prefer async HTTP via httpx, keep functions small; snake_case for vars/functions, CapWords for classes; drop unused imports; type hints where obvious.
-- JavaScript/React: ES modules, 2-space indent, semicolons, single quotes; functional components + hooks; keep API calls in `src/api.js`; components live in `src/components/`.
-- Linting: ESLint flat config with react-hooks/react-refresh; resolve warnings before sending changes.
-- Filenames: `kebab-case` for assets, `PascalCase.jsx` for components, `snake_case.py` for modules.
+- **Python**: Python 3.10+. Async `httpx` for requests. Snake_case for variables/functions, PascalCase for classes. Type hints encouraged.
+- **JavaScript/React**: ES modules. Functional components with hooks. 2-space indentation. PascalCase for components (`.jsx`), kebab-case for assets.
+- **State Management**: React hooks for local state.
+- **API**: Keep backend routes in `backend/main.py` and frontend calls in `frontend/src/api.js`.
 
 ## Testing Guidelines
-- No automated suite yet. Prefer adding lightweight tests: Python (`pytest` under `backend/tests/`), JS (`vitest` or React Testing Library) if introduced.
-- For now, sanity-check flows manually: start both services, create a conversation, send a prompt, verify stages 1-3 stream and conversations persist to `data/conversations/`.
-- When adding tests, mirror fixtures to sample conversation JSON and keep test names descriptive (`test_handles_stage3_timeout`).
+- Currently, no automated test suite exists.
+- **Manual Verification**:
+  1. Start services (`./start.sh`).
+  2. Create a new conversation.
+  3. Send a prompt (e.g., "Why is the sky blue?").
+  4. Verify all 3 stages (Collection, Ranking, Synthesis) stream correctly.
+  5. Refresh page to verify history persistence from SQLite.
+- Future tests: Place Python tests in `backend/tests/` (using `pytest`).
 
 ## Commit & Pull Request Guidelines
-- Commits are short and imperative (e.g., `add vibe code warning`, `readme tweaks`). Keep scope focused.
-- Include concise PR description: goal, key changes, and how to run/verify (`./start.sh` or dev servers + lint).
-- Link related issues if any; add screenshots/GIFs for UI-facing tweaks.
-- Avoid committing `.env` or generated conversation data; ensure secrets stay local.
+- **Commits**: Imperative mood (e.g., "Add stage 4", "Fix streaming bug").
+- **PRs**: Description should include what changed and how to verify.
+- **Secrets**: NEVER commit `.env` or `data/conversations.db`.
 
 ## Configuration & Security
-- Create `.env` in repo root with `OPENROUTER_API_KEY=...`; never commit it.
-- Model selection lives in `backend/config.py` (`COUNCIL_MODELS`, `CHAIRMAN_MODEL`); adjust there and keep IDs valid for OpenRouter.
-- Data now lives in SQLite (`data/conversations.db` by default). Override with `DB_PATH` env var if you want a different location or mount. Clear the DB if testing with sensitive prompts.
+- **Environment**: Create `.env` in root with `OPENROUTER_API_KEY=...`.
+- **Models**: Configured in `backend/config.py` (`COUNCIL_MODELS`, `CHAIRMAN_MODEL`).
+- **Database**: defaults to `data/conversations.db`. Can be overridden with `DB_PATH`.
